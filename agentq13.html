@@ -1607,17 +1607,20 @@ function getOrdersByMonth(orders) {
                 const rowStyle = isCurrentAgent ? 'background-color: rgba(67, 97, 238, 0.1); font-weight: 600;' : '';
                 
                 row.innerHTML = `
-                    <td style="${rowStyle}">
-                        ${rank === 1 ? '🏆 ' : ''}${rank}
-                    </td>
-                    <td style="${rowStyle}">${agentId}</td>
-                    <td style="${rowStyle}">${name}</td>
-                    <td style="${rowStyle}">RM ${totalSales.toFixed(2)}</td>
-                    <td style="${rowStyle}">RM ${totalCommission.toFixed(2)}</td>
-                    <td style="${rowStyle}">
-                        <span class="agent-type-badge ${typeClass}">${type}</span>
-                    </td>
-                `;
+    <td style="${rowStyle}">
+        ${rank === 1 ? '🏆 ' : ''}
+        ${rank === 2 ? '🥈 ' : ''}
+        ${rank === 3 ? '🥉 ' : ''}
+        ${rank > 3 ? rank : ''}
+    </td>
+    <td style="${rowStyle}">${agentId}</td>
+    <td style="${rowStyle}">${name}</td>
+    <td style="${rowStyle}">RM ${totalSales.toFixed(2)}</td>
+    <td style="${rowStyle}">RM ${totalCommission.toFixed(2)}</td>
+    <td style="${rowStyle}">
+        <span class="agent-type-badge ${typeClass}">${type}</span>
+    </td>
+`;
                 
                 tableBody.appendChild(row);
             });
