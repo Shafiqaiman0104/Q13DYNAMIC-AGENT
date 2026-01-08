@@ -604,13 +604,21 @@
                 </div>
             </div>
 
-            <!-- Sales Chart -->
-            <div class="chart-container">
-                <div class="chart-header">
-                    <h3 class="chart-title">My Sales Performance</h3>
-                </div>
-                <canvas id="salesChart"></canvas>
-            </div>
+<!-- Sales & Commission Chart -->
+<div class="chart-container">
+    <div class="chart-header">
+        <h3 class="chart-title">My Sales & Commission Performance</h3>
+    </div>
+    <canvas id="salesCommissionChart"></canvas>
+</div>
+
+<!-- Orders Chart -->
+<div class="chart-container">
+    <div class="chart-header">
+        <h3 class="chart-title">My Orders Performance</h3>
+    </div>
+    <canvas id="ordersChart"></canvas>
+</div>
         </div>
 
         <!-- Customer Order Tab -->
@@ -1133,82 +1141,190 @@
             return 0; // Default fallback - no commission
         }
 
-        // Initialize sales chart
-        function initializeSalesChart() {
-            if (!myAgentData) return;
-            
-            // Filter orders for current agent
-            const agentOrders = ordersData.filter(order => 
-                order.UserId === userId || order.userId === userId
-            );
-            
-            // Group sales by month for last 6 months
-            const salesByMonth = getSalesByMonth(agentOrders);
-            
-            // Get last 6 months
-            const months = getLast6Months();
-            
-            // Prepare data for chart
-            const salesDataPoints = months.map(month => salesByMonth[month] || 0);
-            
-            // Format month labels
-            const monthLabels = months.map(month => {
-                const [year, monthNum] = month.split('-');
-                const date = new Date(year, monthNum - 1);
-                return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-            });
-            
-            // Destroy existing chart if it exists
-            if (salesChart) {
-                salesChart.destroy();
-            }
-            
-            // Create chart
-            const salesCtx = document.getElementById('salesChart').getContext('2d');
-            salesChart = new Chart(salesCtx, {
-                type: 'bar',
-                data: {
-                    labels: monthLabels,
-                    datasets: [{
-                        label: 'Sales (RM)',
-                        data: salesDataPoints,
-                        backgroundColor: 'rgba(67, 97, 238, 0.6)',
-                        borderColor: 'rgba(67, 97, 238, 1)',
-                        borderWidth: 1
-                    }]
+// Initialize sales & commission chart
+function initializeSalesChart() {
+    if (!myAgentData) return;
+    
+    // Filter orders for current agent
+    const agentOrders = ordersData.filter(order => 
+        order.UserId === userId || order.userId === userId
+    );
+    
+    // Group sales and commission by month for last 6 months
+    const salesByMonth = getSalesByMonth(agentOrders);
+    const commissionByMonth = getCommissionByMonth(agentOrders);
+    
+    // Get last 6 months
+    const months = getLast6Months();
+    
+    // Prepare data for chart
+    const salesDataPoints = months.map(month => salesByMonth[month] || 0);
+    const commissionDataPoints = months.map(month => commissionByMonth[month] || 0);
+    
+    // Format month labels
+    const monthLabels = months.map(month => {
+        const [year, monthNum] = month.split('-');
+        const date = new Date(year, monthNum - 1);
+        return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    });
+    
+    // Destroy existing chart if it exists
+    if (salesChart) {
+        salesChart.destroy();
+    }
+    
+    // Create line chart for Sales & Commission
+    const salesCtx = document.getElementById('salesCommissionChart').getContext('2d');
+    salesChart = new Chart(salesCtx, {
+        type: 'line',
+        data: {
+            labels: monthLabels,
+            datasets: [
+                {
+                    label: 'Sales (RM)',
+                    data: salesDataPoints,
+                    backgroundColor: 'rgba(114, 9, 183, 0.1)',
+                    borderColor: '#7209b7',
+                    borderWidth: 3,
+                    tension: 0.2,
+                    fill: false
                 },
-                options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            display: true,
-                            position: 'top',
-                        },
-                        title: {
-                            display: false
-                        }
+                {
+                    label: 'Commission (RM)',
+                    data: commissionDataPoints,
+                    backgroundColor: 'rgba(76, 201, 240, 0.1)',
+                    borderColor: '#4cc9f0',
+                    borderWidth: 3,
+                    tension: 0.2,
+                    fill: false
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                },
+                title: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
                     },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.05)'
-                            },
-                            ticks: {
-                                callback: function(value) {
-                                    return 'RM ' + value;
-                                }
-                            }
-                        },
-                        x: {
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.05)'
-                            }
+                    ticks: {
+                        callback: function(value) {
+                            return 'RM ' + value;
                         }
                     }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
                 }
-            });
+            }
         }
+    });
+    
+    // Initialize orders chart
+    initializeOrdersChart(agentOrders, months, monthLabels);
+} 
+
+// Helper function to get commission by month
+function getCommissionByMonth(orders) {
+    const commissionByMonth = {};
+    
+    orders.forEach(order => {
+        const date = new Date(order.Timestamp);
+        const monthYear = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+        const commission = calculateCommission(order);
+        
+        if (!commissionByMonth[monthYear]) {
+            commissionByMonth[monthYear] = 0;
+        }
+        commissionByMonth[monthYear] += commission;
+    });
+    
+    return commissionByMonth;
+}
+
+// Initialize orders chart
+function initializeOrdersChart(agentOrders, months, monthLabels) {
+    // Group orders by month
+    const ordersByMonth = getOrdersByMonth(agentOrders);
+    
+    // Prepare data for chart
+    const ordersDataPoints = months.map(month => ordersByMonth[month] || 0);
+    
+    // Create bar chart for Orders
+    const ordersCtx = document.getElementById('ordersChart').getContext('2d');
+    const ordersChart = new Chart(ordersCtx, {
+        type: 'bar',
+        data: {
+            labels: monthLabels,
+            datasets: [{
+                label: 'Number of Orders',
+                data: ordersDataPoints,
+                backgroundColor: '#ff6a00',
+                borderColor: '#ff6a00',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                },
+                title: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return value + ' orders';
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Helper function to get orders by month
+function getOrdersByMonth(orders) {
+    const ordersByMonth = {};
+    
+    orders.forEach(order => {
+        const date = new Date(order.Timestamp);
+        const monthYear = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+        
+        if (!ordersByMonth[monthYear]) {
+            ordersByMonth[monthYear] = 0;
+        }
+        ordersByMonth[monthYear] += 1;
+    });
+    
+    return ordersByMonth;
+}       
 
         // Helper function to get sales by month
         function getSalesByMonth(orders) {
