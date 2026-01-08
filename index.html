@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Q13 AGENT - Login</title>
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #1e3a8a, #1e40af);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: 
+      linear-gradient(rgb(255 111 43 / 90%), rgb(0 126 255 / 90%));
+      background-size: auto;
+    }
+    .logo {
+      height: 100px; /* Adjust this value to make logo bigger/smaller */
+      width: auto;
+    }
+    .logoBox{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .login-box {
+      background: white;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 400px;
+      position: relative;
+      z-index: 1;
+    }
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #f97316;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #ea580c;
+    }
+    button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+    .error {
+      color: #d32f2f;
+      text-align: center;
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 5px;
+      background-color: #ffebee;
+      border: 1px solid #f5c6cb;
+      display: none;
+    }
+    .error.show {
+      display: block;
+      animation: fadeIn 0.3s;
+    }
+    
+    /* Loading Popup Styles */
+    .loading-popup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s, visibility 0.3s;
+    }
+    .loading-popup.show {
+      opacity: 1;
+      visibility: visible;
+    }
+    .loading-content {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+      max-width: 300px;
+      width: 80%;
+    }
+    .spinner {
+      border: 5px solid #f3f3f3;
+      border-top: 5px solid #f97316;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+    .loading-text {
+      font-size: 18px;
+      color: #333;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+@media (max-width: 768px) { 
+    .login-box { 
+    width: 100%; 
+    max-width: 300px; 
+    } 
+}
+
+  </style>
+</head>
+<body>
+  <div class="login-box">
+    <div class="logoBox">
+      <img src="Q13LOGO.png" alt="Q13 Logo" class="logo">
+      <img src="ventureRush.png" alt="Q13 Logo" class="logo"><b style="color:#f97316;">Powered by<b style="color:#248af5;"> VentureRush</b></b>
+    </div>
+
+    <p style="text-align:center; color: #555;">Sign in to access your Agent Dashboard.</p>
+    <input type="text" id="userId" placeholder="User ID" required />
+    <input type="password" id="password" placeholder="Password" required />
+    <button id="loginBtn" onclick="login()">Sign In</button>
+    <div class="error" id="errorMsg"></div>
+  </div>
+
+  <!-- Loading Popup -->
+  <div class="loading-popup" id="loadingPopup">
+    <div class="loading-content">
+      <div class="spinner"></div>
+      <div class="loading-text">Signing in...</div>
+    </div>
+  </div>
+
+  <script>
+    const LOGIN_AGENT_DATABASE_URL = "AKfycbwzpmLQP8ZrE9MNM5A5pS--7h3Z0eurbAE1GVUHrJ46q2plM6yxpJ-5Qk-7SKV71sNy"; // Replace with your actual deployment ID
+
+    function login() {
+      const userId = document.getElementById('userId').value.trim();
+      const password = document.getElementById('password').value.trim();
+      const errorMsg = document.getElementById('errorMsg');
+      const loginBtn = document.getElementById('loginBtn');
+      const loadingPopup = document.getElementById('loadingPopup');
+      
+      // Hide any previous error messages
+      errorMsg.classList.remove('show');
+      
+      // Validate inputs
+      if (!userId || !password) {
+        showError("Please enter both User ID and Password.");
+        return;
+      }
+      
+      // Show loading popup and disable button
+      loadingPopup.classList.add('show');
+      loginBtn.disabled = true;
+      loginBtn.textContent = "Signing In...";
+
+      fetch(`https://script.google.com/macros/s/${LOGIN_AGENT_DATABASE_URL}/exec`)
+        .then(response => response.json())
+        .then(data => {
+          const users = data.users || [];
+          const foundUser = users.find(user => user.userId === userId && user.password === password);
+
+          if (foundUser) {
+            localStorage.setItem('username', foundUser.username);
+            localStorage.setItem('userId', foundUser.userId);
+            localStorage.setItem('userType', foundUser.type);
+
+            const userType = foundUser.type.toLowerCase();
+            if (userType === "agent") {
+              window.location.href = "agentq13.html";
+            } else if (userType === "staff") {
+              window.location.href = "index.html";
+            } else {
+              showError("Unknown user type.");
+              hideLoading();
+            }
+          } else {
+            showError("Invalid User ID or Password.");
+            hideLoading();
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          showError("Error fetching user data. Please try again.");
+          hideLoading();
+        });
+    }
+    
+    function showError(message) {
+      const errorMsg = document.getElementById('errorMsg');
+      errorMsg.textContent = message;
+      errorMsg.classList.add('show');
+    }
+    
+    function hideLoading() {
+      const loadingPopup = document.getElementById('loadingPopup');
+      const loginBtn = document.getElementById('loginBtn');
+      
+      loadingPopup.classList.remove('show');
+      loginBtn.disabled = false;
+      loginBtn.textContent = "Sign In";
+    }
+    
+    // Allow pressing Enter to submit the form
+    document.addEventListener('DOMContentLoaded', function() {
+      const userIdInput = document.getElementById('userId');
+      const passwordInput = document.getElementById('password');
+      
+      userIdInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          login();
+        }
+      });
+      
+      passwordInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          login();
+        }
+      });
+    });
+  </script>
+</body>
+
+</html>

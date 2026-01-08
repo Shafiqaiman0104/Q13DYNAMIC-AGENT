@@ -1,0 +1,1656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Dashboard - Q13</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #ff6a00;
+            --secondary-color: #0b75f9;
+            --success-color: #4cc9f0;
+            --warning-color: #f72585;
+            --info-color: #7209b7;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --gray-color: #6c757d;
+            --border-radius: 12px;
+            --box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fb;
+            color: var(--dark-color);
+            min-height: 100vh;
+            padding-bottom: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1.5rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo i {
+            font-size: 2.2rem;
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 2px solid white;
+        }
+
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Navigation Tabs */
+        .tabs {
+            display: flex;
+            background-color: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            margin-bottom: 2rem;
+            box-shadow: var(--box-shadow);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 1.2rem 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab:hover {
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+
+        .tab.active {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+            background-color: rgba(67, 97, 238, 0.1);
+        }
+
+        .tab i {
+            margin-right: 8px;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--box-shadow);
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 1.8rem 1.5rem;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card.total-orders {
+            border-left-color: var(--primary-color);
+        }
+
+        .stat-card.total-sales {
+            border-left-color: var(--info-color);
+        }
+
+        .stat-card.total-commission {
+            border-left-color: var(--success-color);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            color: white;
+        }
+
+        .stat-icon.total-orders {
+            background-color: var(--primary-color);
+        }
+
+        .stat-icon.total-sales {
+            background-color: var(--info-color);
+        }
+
+        .stat-icon.total-commission {
+            background-color: var(--success-color);
+        }
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: var(--gray-color);
+            font-weight: 500;
+        }
+
+        /* Data Tables */
+        .data-table-container {
+            overflow-x: auto;
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1200px;
+        }
+
+        .data-table th {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .data-table td {
+            padding: 0.8rem;
+            border-bottom: 1px solid #eee;
+            font-size: 0.9rem;
+        }
+
+        .data-table tr:hover {
+            background-color: rgba(67, 97, 238, 0.05);
+        }
+
+        .data-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .status {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status.paid, .status.delivered {
+            background-color: rgba(40, 167, 69, 0.15);
+            color: #28a745;
+        }
+
+        .status.pending {
+            background-color: rgba(255, 193, 7, 0.15);
+            color: #ffc107;
+        }
+
+        .status.cancelled {
+            background-color: rgba(220, 53, 69, 0.15);
+            color: #dc3545;
+        }
+
+        /* Filters and Search */
+        .filters {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.8rem 1rem 0.8rem 2.5rem;
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-color);
+        }
+
+        .filter-select {
+            padding: 0.8rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 30px;
+            font-size: 1rem;
+            background-color: white;
+            min-width: 150px;
+        }
+
+        /* Loading Spinner */
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(67, 97, 238, 0.2);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Error Message */
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            border: 1px solid #f5c6cb;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        /* Compact view for smaller screens */
+        .compact-text {
+            max-width: 150px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Logout button */
+        .logout-btn {
+            padding: 0.5rem 1rem;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            margin-top: 5px;
+        }
+
+        .logout-btn:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 992px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .tabs {
+                flex-wrap: wrap;
+            }
+
+            .tab {
+                flex: 1 0 calc(50% - 4px);
+                padding: 1rem 0.5rem;
+            }
+
+            .tab-content {
+                padding: 1.5rem 1rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-card {
+                padding: 1.5rem 1rem;
+            }
+
+            .filters {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box, .filter-select {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .tab {
+                flex: 1 0 100%;
+            }
+
+            .logo h1 {
+                font-size: 1.5rem;
+            }
+
+            .stat-value {
+                font-size: 1.8rem;
+            }
+        }
+
+        /* Agent Type Badges */
+        .agent-type-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .agent-type-badge.basic {
+            background-color: rgba(108, 117, 125, 0.15);
+            color: #6c757d;
+        }
+
+        .agent-type-badge.premium {
+            background-color: rgba(255, 193, 7, 0.15);
+            color: #ffc107;
+        }
+
+        /* Chart Container */
+        .chart-container {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--box-shadow);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-chart-line"></i>
+                    <h1>Q13 Agent Dashboard</h1>
+                </div>
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <img src="Q13LOGO.png" alt="Logo">
+                    </div>
+                    <div>
+                        <h3 id="welcomeText">Welcome!</h3>
+                        <button class="logout-btn" onclick="logout()">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Error Message Area -->
+        <div class="error-message" id="error-message">
+            <strong>Error:</strong> <span id="error-text"></span>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="tabs">
+            <div class="tab active" data-tab="dashboard">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </div>
+            <div class="tab" data-tab="customer-order">
+                <i class="fas fa-shopping-cart"></i> Customer Order
+            </div>
+            <div class="tab" data-tab="top-agent">
+                <i class="fas fa-trophy"></i> Top Agent
+            </div>
+            <div class="tab" data-tab="my-profile">
+                <i class="fas fa-user"></i> My Profile
+            </div>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <div class="stats-grid">
+                <div class="stat-card total-orders">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-value" id="total-orders">0</div>
+                            <div class="stat-label">Total Orders</div>
+                        </div>
+                        <div class="stat-icon total-orders">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card total-sales">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-value" id="total-sales">RM 0</div>
+                            <div class="stat-label">Total Sales</div>
+                        </div>
+                        <div class="stat-icon total-sales">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stat-card total-commission">
+                    <div class="stat-header">
+                        <div>
+                            <div class="stat-value" id="total-commission">RM 0</div>
+                            <div class="stat-label">Total Commission</div>
+                        </div>
+                        <div class="stat-icon total-commission">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sales Chart -->
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3 class="chart-title">My Sales Performance</h3>
+                </div>
+                <canvas id="salesChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Customer Order Tab -->
+        <div id="customer-order" class="tab-content">
+            <div class="filters">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="order-search" placeholder="Search order data...">
+                </div>
+                <div>
+                    <select class="filter-select" id="order-status-filter">
+                        <option value="all">All Statuses</option>
+                        <option value="paid">Paid</option>
+                        <option value="pending">Pending</option>
+                    </select>
+                    <select class="filter-select" id="order-delivery-filter">
+                        <option value="all">All Delivery</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="pending">Pending</option>
+                        <option value="Notice">Notice</option>
+                        <option value="Packing">Packing</option>
+                        <option value="On Delivery">On Delivery</option>
+                        <option value="Complete">Complete</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="data-table-container">
+                <div class="loading" id="orders-loading">
+                    <div class="spinner"></div>
+                    <p>Loading customer orders...</p>
+                </div>
+                <table class="data-table" id="orders-table" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>Name</th>
+                            <th>Contact</th>
+                            <th>Address</th>
+                            <th>Product</th>
+                            <th>Qty</th>
+                            <th>Postage</th>
+                            <th>Note</th>
+                            <th>Discount Code</th>
+                            <th>Spin Prize</th>
+                            <th>Total</th>
+                            <th>Payment</th>
+                            <th>Bill Code</th>
+                            <th>Delivery</th> 
+                            <th>Commission</th> 
+                            <th>Remark</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orders-table-body">
+                        <!-- Orders data will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Top Agent Tab -->
+        <div id="top-agent" class="tab-content">
+            <div class="filters">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="agent-search" placeholder="Search agents...">
+                </div>
+            </div>
+
+            <div class="data-table-container">
+                <div class="loading" id="agents-loading">
+                    <div class="spinner"></div>
+                    <p>Loading agent rankings...</p>
+                </div>
+                <table class="data-table" id="agents-table" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Agent ID</th>
+                            <th>Name</th>
+                            <th>Total Sales (RM)</th>
+                            <th>Total Commission (RM)</th>
+                            <th>Type</th>
+                        </tr>
+                    </thead>
+                    <tbody id="agents-table-body">
+                        <!-- Agents data will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- My Profile Tab -->
+        <div id="my-profile" class="tab-content">
+            <div class="loading" id="profile-loading">
+                <div class="spinner"></div>
+                <p>Loading profile information...</p>
+            </div>
+            
+            <div id="profile-content" style="display: none;">
+                <div class="profile-header" style="display: flex; align-items: center; gap: 20px; margin-bottom: 2rem;">
+                    <div class="profile-avatar" style="width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; color: white; font-weight: bold;">
+                        <span id="profile-initials">A</span>
+                    </div>
+                    <div>
+                        <h2 id="profile-name" style="margin-bottom: 0.5rem;"></h2>
+                        <div id="profile-id" style="color: var(--gray-color); margin-bottom: 0.5rem;"></div>
+                        <div id="profile-type" class="agent-type-badge basic" style="display: inline-block;"></div>
+                    </div>
+                </div>
+
+                <div class="profile-details" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+                    <div class="profile-card" style="background: #f8f9fa; padding: 1.5rem; border-radius: var(--border-radius);">
+                        <h3 style="margin-bottom: 1rem; color: var(--primary-color);">
+                            <i class="fas fa-id-card"></i> Agent Information
+                        </h3>
+                        <div class="profile-field" style="margin-bottom: 0.8rem;">
+                            <div style="font-weight: 600; color: var(--dark-color); margin-bottom: 0.2rem;">Agent ID</div>
+                            <div id="profile-agent-id" style="color: var(--gray-color);"></div>
+                        </div>
+                        <div class="profile-field" style="margin-bottom: 0.8rem;">
+                            <div style="font-weight: 600; color: var(--dark-color); margin-bottom: 0.2rem;">Name</div>
+                            <div id="profile-full-name" style="color: var(--gray-color);"></div>
+                        </div>
+                        <div class="profile-field" style="margin-bottom: 0.8rem;">
+                            <div style="font-weight: 600; color: var(--dark-color); margin-bottom: 0.2rem;">Type</div>
+                            <div id="profile-agent-type" style="color: var(--gray-color);"></div>
+                        </div>
+                    </div>
+
+                    <div class="profile-card" style="background: #f8f9fa; padding: 1.5rem; border-radius: var(--border-radius);">
+                        <h3 style="margin-bottom: 1rem; color: var(--primary-color);">
+                            <i class="fas fa-address-book"></i> Contact Information
+                        </h3>
+                        <div class="profile-field" style="margin-bottom: 0.8rem;">
+                            <div style="font-weight: 600; color: var(--dark-color); margin-bottom: 0.2rem;">Phone</div>
+                            <div id="profile-phone" style="color: var(--gray-color);"></div>
+                        </div>
+                        <div class="profile-field" style="margin-bottom: 0.8rem;">
+                            <div style="font-weight: 600; color: var(--dark-color); margin-bottom: 0.2rem;">Email</div>
+                            <div id="profile-email" style="color: var(--gray-color);"></div>
+                        </div>
+                        <div class="profile-field" style="margin-bottom: 0.8rem;">
+                            <div style="font-weight: 600; color: var(--dark-color); margin-bottom: 0.2rem;">Address</div>
+                            <div id="profile-address" style="color: var(--gray-color);"></div>
+                        </div>
+                    </div>
+
+                    <div class="profile-card" style="background: #f8f9fa; padding: 1.5rem; border-radius: var(--border-radius);">
+                        <h3 style="margin-bottom: 1rem; color: var(--primary-color);">
+                            <i class="fas fa-university"></i> Bank Information
+                        </h3>
+                        <div class="profile-field" style="margin-bottom: 0.8rem;">
+                            <div style="font-weight: 600; color: var(--dark-color); margin-bottom: 0.2rem;">Bank Name</div>
+                            <div id="profile-bank-name" style="color: var(--gray-color);"></div>
+                        </div>
+                        <div class="profile-field" style="margin-bottom: 0.8rem;">
+                            <div style="font-weight: 600; color: var(--dark-color); margin-bottom: 0.2rem;">Bank Account Number</div>
+                            <div id="profile-bank-account" style="color: var(--gray-color);"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== LOGIN VERIFICATION ====================
+        // Check if user is logged in
+        const username = localStorage.getItem("username") || "";
+        const userType = localStorage.getItem("userType") || "";
+        const userId = localStorage.getItem("userId") || "";
+
+        // Redirect to login if not logged in or not agent
+        if (!username || userType.toLowerCase() !== "agent") {
+            window.location.href = "index.html";
+        }
+
+        // Set welcome text
+        document.addEventListener('DOMContentLoaded', function() {
+            const welcomeElement = document.getElementById('welcomeText');
+            if (welcomeElement && username) {
+                welcomeElement.textContent = `Welcome ${username}!`;
+            }
+        });
+
+        // Logout function
+        function logout() {
+            // Clear all stored login data
+            localStorage.removeItem("username");
+            localStorage.removeItem("userId");
+            localStorage.removeItem("userType");
+            
+            // Redirect to login page
+            window.location.href = "index.html";
+        }
+        // ==================== END LOGIN VERIFICATION ====================
+
+        // URLs for Google Apps Script Web Apps
+        const ORDER_DATABASE_URL = 'https://script.google.com/macros/s/AKfycbxhuHO7-6fGOIS-BF9kUYHIBNzPVspo3MTyRIZvZnRY0WzuYOavP_gPoG_OJyuTShPq/exec';
+        const AGENT_DATABASE_URL = 'https://script.google.com/macros/s/AKfycbwL86AaXKMwV7FBIQMcXCTt9qlCHDvi2Ftqzr-u5ePJGdgzMqqVWFQwdbXMRET8cldY/exec';
+        const SUPPLIER_DATABASE_URL = 'https://script.google.com/macros/s/AKfycbwYsRYtwcstQ1TbK0m8QyUBFmNydDQ2K-C8U1ANjZ4AZNySPsJI2el6QHFklWQ35Vb7/exec';
+
+        // Global variables for data
+        let ordersData = [];
+        let agentsData = [];
+        let suppliersData = [];
+        let myAgentData = null;
+        let salesChart = null;
+
+        // Helper function to escape HTML special characters
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Remove active class from all tabs and content
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                // Add active class to clicked tab and corresponding content
+                tab.classList.add('active');
+                const tabId = tab.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+                
+                // Load data for the tab when clicked
+                if (tabId === 'dashboard') {
+                    updateDashboardStats();
+                    initializeSalesChart();
+                } else if (tabId === 'customer-order') {
+                    displayCustomerOrders();
+                } else if (tabId === 'top-agent') {
+                    displayTopAgents();
+                } else if (tabId === 'my-profile') {
+                    displayMyProfile();
+                }
+            });
+        });
+
+        // Initialize the dashboard
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                console.log('Loading data from Google Sheets for agent:', userId);
+                
+                // Fetch all data in parallel
+                const [ordersResult, agentsResult, suppliersResult] = await Promise.allSettled([
+                    fetchOrdersData(),
+                    fetchAgentsData(),
+                    fetchSuppliersData()
+                ]);
+                
+                // Handle orders data
+                if (ordersResult.status === 'fulfilled') {
+                    ordersData = ordersResult.value;
+                    console.log('Orders data loaded:', ordersData.length, 'records');
+                } else {
+                    console.error('Failed to load orders:', ordersResult.reason);
+                    showError(`Failed to load orders: ${ordersResult.reason.message || 'Unknown error'}`);
+                }
+                
+                // Handle agents data
+                if (agentsResult.status === 'fulfilled') {
+                    agentsData = agentsResult.value;
+                    console.log('Agents data loaded:', agentsData.length, 'records');
+                    
+                    // Find current agent's data
+                    myAgentData = agentsData.find(agent => 
+                        agent['Agent ID'] === userId || 
+                        agent['Agent ID '] === userId || 
+                        agent.agentId === userId
+                    );
+                    
+                    if (myAgentData) {
+                        console.log('Found agent data:', myAgentData);
+                    } else {
+                        console.warn('Agent data not found for ID:', userId);
+                        showError('Agent profile not found. Please contact administrator.');
+                    }
+                } else {
+                    console.error('Failed to load agents:', agentsResult.reason);
+                    showError(`Failed to load agents: ${agentsResult.reason.message || 'Unknown error'}`);
+                }
+                
+                // Handle suppliers data
+                if (suppliersResult.status === 'fulfilled') {
+                    suppliersData = suppliersResult.value;
+                    console.log('Suppliers data loaded:', suppliersData.length, 'records');
+                } else {
+                    console.error('Failed to load suppliers:', suppliersResult.reason);
+                    showError(`Failed to load suppliers: ${suppliersResult.reason.message || 'Unknown error'}`);
+                }
+                
+                // Update dashboard
+                updateDashboardStats();
+                
+                // Display data for active tab
+                if (document.getElementById('dashboard').classList.contains('active')) {
+                    initializeSalesChart();
+                } else if (document.getElementById('customer-order').classList.contains('active')) {
+                    displayCustomerOrders();
+                } else if (document.getElementById('top-agent').classList.contains('active')) {
+                    displayTopAgents();
+                } else if (document.getElementById('my-profile').classList.contains('active')) {
+                    displayMyProfile();
+                }
+                
+                // Set up search and filter functionality
+                setupEventListeners();
+                
+            } catch (error) {
+                console.error('Error loading data:', error);
+                showError(`Failed to load data: ${error.message}`);
+            }
+        });
+
+        // Show error message
+        function showError(message) {
+            const errorElement = document.getElementById('error-message');
+            const errorText = document.getElementById('error-text');
+            errorText.textContent = message;
+            errorElement.style.display = 'block';
+            
+            // Hide error after 10 seconds
+            setTimeout(() => {
+                errorElement.style.display = 'none';
+            }, 10000);
+        }
+
+        // Function to fetch orders data
+        async function fetchOrdersData() {
+            try {
+                console.log('Fetching orders data from:', ORDER_DATABASE_URL);
+                const response = await fetch(ORDER_DATABASE_URL);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log('Orders API response:', result);
+                
+                if (result.success && Array.isArray(result.data)) {
+                    // The first row is headers, so skip it
+                    const headers = result.data[0];
+                    const rows = result.data.slice(1);
+                    
+                    // Convert rows to objects with header keys
+                    return rows.map(row => {
+                        const obj = {};
+                        headers.forEach((header, index) => {
+                            obj[header] = row[index] || '';
+                        });
+                        return obj;
+                    });
+                } else {
+                    throw new Error(result.message || 'Invalid data format from orders API');
+                }
+            } catch (error) {
+                console.error('Error fetching orders data:', error);
+                throw error;
+            }
+        }
+
+        // Function to fetch agents data
+        async function fetchAgentsData() {
+            try {
+                console.log('Fetching agents data from:', AGENT_DATABASE_URL);
+                const response = await fetch(AGENT_DATABASE_URL);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log('Agents API response:', result);
+                
+                if (result.success && Array.isArray(result.data)) {
+                    // The first row is headers, so skip it
+                    const headers = result.data[0];
+                    const rows = result.data.slice(1);
+                    
+                    // Convert rows to objects with header keys
+                    return rows.map(row => {
+                        const obj = {};
+                        headers.forEach((header, index) => {
+                            // Fix: Trim header names to remove trailing spaces
+                            const cleanHeader = header.trim();
+                            obj[cleanHeader] = row[index] || '';
+                        });
+                        return obj;
+                    });
+                } else {
+                    throw new Error(result.message || 'Invalid data format from agents API');
+                }
+            } catch (error) {
+                console.error('Error fetching agents data:', error);
+                throw error;
+            }
+        }
+
+        // Function to fetch suppliers data
+        async function fetchSuppliersData() {
+            try {
+                console.log('Fetching suppliers data from:', SUPPLIER_DATABASE_URL);
+                const response = await fetch(SUPPLIER_DATABASE_URL);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log('Suppliers API response:', result);
+                
+                if (result.success && Array.isArray(result.data)) {
+                    return result.data;
+                } else {
+                    throw new Error(result.message || 'Invalid data format from suppliers API');
+                }
+            } catch (error) {
+                console.error('Error fetching suppliers data:', error);
+                throw error;
+            }
+        }
+
+        // Update dashboard statistics
+        function updateDashboardStats() {
+            if (!myAgentData) return;
+            
+            // Filter orders for current agent
+            const agentOrders = ordersData.filter(order => 
+                order.UserId === userId || order.userId === userId
+            );
+            
+            // Total Orders
+            const totalOrders = agentOrders.length;
+            document.getElementById('total-orders').textContent = totalOrders;
+            
+            // Total Sales
+            let totalSales = 0;
+            agentOrders.forEach(order => {
+                const total = parseFloat(order.Total) || 0;
+                totalSales += total;
+            });
+            document.getElementById('total-sales').textContent = `RM ${totalSales.toFixed(2)}`;
+            
+            // Total Commission
+            let totalCommission = 0;
+            agentOrders.forEach(order => {
+                const commission = calculateCommission(order);
+                totalCommission += commission;
+            });
+            document.getElementById('total-commission').textContent = `RM ${totalCommission.toFixed(2)}`;
+        }
+
+        // Calculate commission for an order
+        function calculateCommission(order) {
+            const productCode = order['Product Code'] || '';
+            const productQuantity = parseInt(order['Product Quantity']) || 1;
+            
+            // Get commission rate from supplier database
+            const commissionRate = getCommissionRate(productCode, suppliersData);
+            
+            // Apply agent type multiplier
+            const agentMultiplier = getAgentCommissionMultiplier(myAgentData);
+            
+            // Calculate commission
+            return (commissionRate * productQuantity) * agentMultiplier;
+        }
+
+        // Helper function to get commission rate for a product from supplier database
+        function getCommissionRate(productCode, suppliersData) {
+            if (!suppliersData || !productCode) return 0;
+            
+            // Find supplier by product code
+            const supplier = suppliersData.find(s => s.Code === productCode);
+            
+            // Return Profit (Agent) or 0 if not found
+            if (supplier && supplier['Profit (Agent)']) {
+                return parseFloat(supplier['Profit (Agent)']) || 0;
+            }
+            
+            return 0;
+        }
+
+        // Helper function to get agent commission multiplier based on type
+        function getAgentCommissionMultiplier(agent) {
+            if (!agent) return 0;
+            
+            const type = agent.Type || agent.type || 'basic';
+            
+            // Apply commission rules based on type
+            if (type === 'premium') {
+                return 1; // Full commission (100%)
+            } else if (type === 'basic') {
+                return 0.5; // 50% commission (-50% from original)
+            }
+            
+            return 0; // Default fallback - no commission
+        }
+
+        // Initialize sales chart
+        function initializeSalesChart() {
+            if (!myAgentData) return;
+            
+            // Filter orders for current agent
+            const agentOrders = ordersData.filter(order => 
+                order.UserId === userId || order.userId === userId
+            );
+            
+            // Group sales by month for last 6 months
+            const salesByMonth = getSalesByMonth(agentOrders);
+            
+            // Get last 6 months
+            const months = getLast6Months();
+            
+            // Prepare data for chart
+            const salesDataPoints = months.map(month => salesByMonth[month] || 0);
+            
+            // Format month labels
+            const monthLabels = months.map(month => {
+                const [year, monthNum] = month.split('-');
+                const date = new Date(year, monthNum - 1);
+                return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+            });
+            
+            // Destroy existing chart if it exists
+            if (salesChart) {
+                salesChart.destroy();
+            }
+            
+            // Create chart
+            const salesCtx = document.getElementById('salesChart').getContext('2d');
+            salesChart = new Chart(salesCtx, {
+                type: 'bar',
+                data: {
+                    labels: monthLabels,
+                    datasets: [{
+                        label: 'Sales (RM)',
+                        data: salesDataPoints,
+                        backgroundColor: 'rgba(67, 97, 238, 0.6)',
+                        borderColor: 'rgba(67, 97, 238, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                        },
+                        title: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            ticks: {
+                                callback: function(value) {
+                                    return 'RM ' + value;
+                                }
+                            }
+                        },
+                        x: {
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Helper function to get sales by month
+        function getSalesByMonth(orders) {
+            const salesByMonth = {};
+            
+            orders.forEach(order => {
+                const date = new Date(order.Timestamp);
+                const monthYear = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+                const total = parseFloat(order.Total) || 0;
+                
+                if (!salesByMonth[monthYear]) {
+                    salesByMonth[monthYear] = 0;
+                }
+                salesByMonth[monthYear] += total;
+            });
+            
+            return salesByMonth;
+        }
+
+        // Helper function to get last 6 months
+        function getLast6Months() {
+            const months = [];
+            const now = new Date();
+            
+            for (let i = 5; i >= 0; i--) {
+                const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                const year = date.getFullYear();
+                const month = (date.getMonth() + 1).toString().padStart(2, '0');
+                months.push(`${year}-${month}`);
+            }
+            
+            return months;
+        }
+
+        // Format date for display
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            
+            try {
+                const date = new Date(dateString);
+                
+                if (isNaN(date.getTime())) {
+                    return dateString;
+                }
+                
+                return date.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            } catch (e) {
+                return dateString;
+            }
+        }
+
+        // Display customer orders (only for current agent)
+        function displayCustomerOrders() {
+            const tableBody = document.getElementById('orders-table-body');
+            const loadingElement = document.getElementById('orders-loading');
+            const tableElement = document.getElementById('orders-table');
+            
+            // Clear existing rows
+            tableBody.innerHTML = '';
+            
+            // Show loading, hide table
+            loadingElement.style.display = 'flex';
+            tableElement.style.display = 'none';
+            
+            // Check if we have data
+            if (!ordersData || ordersData.length === 0 || !myAgentData) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="16" style="text-align: center; padding: 2rem;">
+                            <i class="fas fa-exclamation-circle" style="font-size: 2rem; color: #6c757d; margin-bottom: 1rem;"></i>
+                            <p>No orders data available.</p>
+                        </td>
+                    </tr>
+                `;
+                
+                // Hide loading, show table
+                loadingElement.style.display = 'none';
+                tableElement.style.display = 'table';
+                return;
+            }
+            
+            // Filter orders for current agent
+            const agentOrders = ordersData.filter(order => 
+                order.UserId === userId || order.userId === userId
+            );
+            
+            // Check if agent has any orders
+            if (agentOrders.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="16" style="text-align: center; padding: 2rem;">
+                            <i class="fas fa-shopping-cart" style="font-size: 2rem; color: #6c757d; margin-bottom: 1rem;"></i>
+                            <p>You haven't made any sales yet.</p>
+                        </td>
+                    </tr>
+                `;
+                
+                // Hide loading, show table
+                loadingElement.style.display = 'none';
+                tableElement.style.display = 'table';
+                return;
+            }
+            
+            // Populate table with orders data
+            agentOrders.forEach(order => {
+                const row = document.createElement('tr');
+                
+                // Determine payment status class
+                const paymentStatus = order['Payment Status'] || 'pending';
+                const paymentStatusClass = paymentStatus.toLowerCase() === 'paid' ? 'paid' : 'pending';
+                
+                // Determine delivery status class
+                const deliveryStatus = order['Delivery Status'] || 'pending';
+                const deliveryStatusClass = deliveryStatus.toLowerCase();
+                let deliveryClass = 'pending';
+                if (deliveryStatusClass === 'delivered' || deliveryStatusClass === 'complete') {
+                    deliveryClass = 'delivered';
+                } else if (deliveryStatusClass === 'cancelled') {
+                    deliveryClass = 'cancelled';
+                }
+                
+                // Escape special characters
+                const timestamp = formatDate(order.Timestamp || 'N/A');
+                const name = escapeHtml(order.Name || 'N/A');
+                const phone = escapeHtml(order.Phone || 'N/A');
+                const email = escapeHtml(order.Email || 'N/A');
+                const contactInfo = `${phone}<br><small>${email}</small>`;
+                const address = escapeHtml(order.Address || 'N/A');
+                const productCode = escapeHtml(order['Product Code'] || '');
+                const productName = escapeHtml(order['Product Name'] || 'N/A');
+                const productInfo = `${productCode}<br><small>${productName}</small>`;
+                const productQuantity = parseInt(order['Product Quantity']) || 1;
+                const postageFee = parseFloat(order['Postage Fee'] || 0);
+                const note = escapeHtml(order.Note || 'N/A');
+                const discountCode = escapeHtml(order['Discount Code'] || 'N/A');
+                const spinPrize = escapeHtml(order['Spin Prize'] || 'N/A');
+                const total = parseFloat(order.Total || 0);
+                const billCode = escapeHtml(order['Bill Code'] || 'N/A');
+                const remark = escapeHtml(order.Remark || 'N/A'); // ADD THIS LINE
+                
+                // Calculate commission
+                const commission = calculateCommission(order);
+                
+                row.innerHTML = `
+    <td>${timestamp}</td>
+    <td>${name}</td>
+    <td>${contactInfo}</td>
+    <td><div class="compact-text" title="${address}">${address}</div></td>
+    <td>${productInfo}</td>
+    <td>${productQuantity}</td>
+    <td>RM ${postageFee.toFixed(2)}</td>
+    <td><div class="compact-text" title="${note}">${note}</div></td>
+    <td>${discountCode}</td>
+    <td>${spinPrize}</td>
+    <td>RM ${total.toFixed(2)}</td>
+    <td><span class="status ${paymentStatusClass}">${paymentStatus}</span></td>
+    <td>${billCode}</td>
+    <td><span class="status ${deliveryClass}">${deliveryStatus}</span></td> 
+    <td>RM ${commission.toFixed(2)}</td>
+    <td><div class="compact-text" title="${remark}">${remark}</div></td>
+`;
+                
+                tableBody.appendChild(row);
+            });
+            
+            // Hide loading, show table
+            loadingElement.style.display = 'none';
+            tableElement.style.display = 'table';
+        }
+
+        // Display top agents ranking
+        function displayTopAgents() {
+            const tableBody = document.getElementById('agents-table-body');
+            const loadingElement = document.getElementById('agents-loading');
+            const tableElement = document.getElementById('agents-table');
+            
+            // Clear existing rows
+            tableBody.innerHTML = '';
+            
+            // Show loading, hide table
+            loadingElement.style.display = 'flex';
+            tableElement.style.display = 'none';
+            
+            // Check if we have data
+            if (!agentsData || agentsData.length === 0 || !ordersData || ordersData.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 2rem;">
+                            <i class="fas fa-exclamation-circle" style="font-size: 2rem; color: #6c757d; margin-bottom: 1rem;"></i>
+                            <p>No agent data available.</p>
+                        </td>
+                    </tr>
+                `;
+                
+                // Hide loading, show table
+                loadingElement.style.display = 'none';
+                tableElement.style.display = 'table';
+                return;
+            }
+            
+            // Calculate sales and commission for each agent
+            const agentStats = calculateAgentStats();
+            
+            // Sort agents by total sales (descending)
+            const sortedAgents = Object.values(agentStats).sort((a, b) => b.totalSales - a.totalSales);
+            
+            // Populate table with agent rankings
+            sortedAgents.forEach((agent, index) => {
+                const row = document.createElement('tr');
+                
+                const rank = index + 1;
+                const agentId = escapeHtml(agent.userId);
+                const name = escapeHtml(agent.name || 'N/A');
+                const totalSales = agent.totalSales;
+                const totalCommission = agent.totalCommission;
+                const type = agent.type || 'basic';
+                const typeClass = type === 'premium' ? 'premium' : 'basic';
+                
+                // Highlight current agent's row
+                const isCurrentAgent = agentId === userId;
+                const rowStyle = isCurrentAgent ? 'background-color: rgba(67, 97, 238, 0.1); font-weight: 600;' : '';
+                
+                row.innerHTML = `
+                    <td style="${rowStyle}">
+                        ${rank === 1 ? '🏆 ' : ''}${rank}
+                    </td>
+                    <td style="${rowStyle}">${agentId}</td>
+                    <td style="${rowStyle}">${name}</td>
+                    <td style="${rowStyle}">RM ${totalSales.toFixed(2)}</td>
+                    <td style="${rowStyle}">RM ${totalCommission.toFixed(2)}</td>
+                    <td style="${rowStyle}">
+                        <span class="agent-type-badge ${typeClass}">${type}</span>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+            
+            // Hide loading, show table
+            loadingElement.style.display = 'none';
+            tableElement.style.display = 'table';
+        }
+
+        // Calculate agent statistics
+        function calculateAgentStats() {
+            const agentStats = {};
+            
+            // Initialize agent stats
+            agentsData.forEach(agent => {
+                const agentId = agent['Agent ID'] || agent['Agent ID '] || agent.agentId || '';
+                const name = agent.Name || agent.name || '';
+                const type = agent.Type || agent.type || 'basic';
+                
+                if (agentId) {
+                    agentStats[agentId] = {
+                        userId: agentId,
+                        name: name,
+                        type: type,
+                        totalSales: 0,
+                        totalCommission: 0
+                    };
+                }
+            });
+            
+            // Calculate sales and commission for each order
+            ordersData.forEach(order => {
+                const orderUserId = order.UserId || order.userId || '';
+                
+                if (orderUserId && agentStats[orderUserId]) {
+                    const total = parseFloat(order.Total) || 0;
+                    agentStats[orderUserId].totalSales += total;
+                    
+                    // Find agent for commission calculation
+                    const agent = agentsData.find(a => 
+                        a['Agent ID'] === orderUserId || 
+                        a['Agent ID '] === orderUserId || 
+                        a.agentId === orderUserId
+                    );
+                    
+                    if (agent) {
+                        const commission = calculateCommissionForAgent(order, agent);
+                        agentStats[orderUserId].totalCommission += commission;
+                    }
+                }
+            });
+            
+            return agentStats;
+        }
+
+        // Calculate commission for a specific agent
+        function calculateCommissionForAgent(order, agent) {
+            const productCode = order['Product Code'] || '';
+            const productQuantity = parseInt(order['Product Quantity']) || 1;
+            
+            // Get commission rate from supplier database
+            const commissionRate = getCommissionRate(productCode, suppliersData);
+            
+            // Apply agent type multiplier
+            const type = agent.Type || agent.type || 'basic';
+            let agentMultiplier = 0.5; // basic = 50%
+            if (type === 'premium') {
+                agentMultiplier = 1; // premium = 100%
+            }
+            
+            // Calculate commission
+            return (commissionRate * productQuantity) * agentMultiplier;
+        }
+
+        // Display my profile information
+        function displayMyProfile() {
+            const loadingElement = document.getElementById('profile-loading');
+            const profileContent = document.getElementById('profile-content');
+            
+            // Show loading, hide content
+            loadingElement.style.display = 'flex';
+            profileContent.style.display = 'none';
+            
+            // Check if we have agent data
+            if (!myAgentData) {
+                loadingElement.innerHTML = `
+                    <div style="text-align: center;">
+                        <i class="fas fa-exclamation-circle" style="font-size: 2rem; color: #6c757d; margin-bottom: 1rem;"></i>
+                        <p>Profile not found. Please contact administrator.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Extract agent information
+            const agentId = myAgentData['Agent ID'] || myAgentData['Agent ID '] || myAgentData.agentId || userId;
+            const name = myAgentData.Name || myAgentData.name || 'N/A';
+            const phone = myAgentData.Phone || myAgentData.phone || 'N/A';
+            const email = myAgentData.Email || myAgentData['Email '] || myAgentData.email || 'N/A';
+            const address = myAgentData.Address || myAgentData.address || 'N/A';
+            const type = myAgentData.Type || myAgentData.type || 'basic';
+            const bankName = myAgentData['Bank Name'] || myAgentData.bankName || 'N/A';
+            const bankAccount = myAgentData['Bank Account Number'] || myAgentData.bankAccount || 'N/A';
+            
+            // Set profile initials
+            const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+            document.getElementById('profile-initials').textContent = initials;
+            
+            // Set profile information
+            document.getElementById('profile-name').textContent = name;
+            document.getElementById('profile-id').textContent = `Agent ID: ${agentId}`;
+            
+            // Set agent type badge
+            const typeElement = document.getElementById('profile-type');
+            typeElement.textContent = type.toUpperCase();
+            typeElement.className = `agent-type-badge ${type}`;
+            
+            // Set detailed information
+            document.getElementById('profile-agent-id').textContent = agentId;
+            document.getElementById('profile-full-name').textContent = name;
+            document.getElementById('profile-agent-type').textContent = type.toUpperCase();
+            document.getElementById('profile-phone').textContent = phone;
+            document.getElementById('profile-email').textContent = email;
+            document.getElementById('profile-address').textContent = address;
+            document.getElementById('profile-bank-name').textContent = bankName;
+            document.getElementById('profile-bank-account').textContent = bankAccount;
+            
+            // Hide loading, show content
+            loadingElement.style.display = 'none';
+            profileContent.style.display = 'block';
+        }
+
+        // Set up event listeners for search and filters
+        function setupEventListeners() {
+            // Order search
+            const orderSearch = document.getElementById('order-search');
+            if (orderSearch) {
+                orderSearch.addEventListener('input', filterOrdersTable);
+            }
+            
+            // Order status filter
+            const orderStatusFilter = document.getElementById('order-status-filter');
+            if (orderStatusFilter) {
+                orderStatusFilter.addEventListener('change', filterOrdersTable);
+            }
+            
+            // Order delivery filter
+            const orderDeliveryFilter = document.getElementById('order-delivery-filter');
+            if (orderDeliveryFilter) {
+                orderDeliveryFilter.addEventListener('change', filterOrdersTable);
+            }
+            
+            // Agent search
+            const agentSearch = document.getElementById('agent-search');
+            if (agentSearch) {
+                agentSearch.addEventListener('input', filterAgentsTable);
+            }
+        }
+
+// Filter orders table based on search and filters
+function filterOrdersTable() {
+    const searchTerm = document.getElementById('order-search').value.toLowerCase();
+    const statusFilter = document.getElementById('order-status-filter').value;
+    const deliveryFilter = document.getElementById('order-delivery-filter').value;
+    
+    const rows = document.querySelectorAll('#orders-table-body tr');
+    
+    rows.forEach(row => {
+        const cells = row.querySelectorAll('td');
+        if (cells.length === 0) return;
+        
+        // Check ALL columns for search term
+        let matchesSearch = !searchTerm;
+        if (searchTerm) {
+            matchesSearch = false;
+            for (let i = 0; i < cells.length; i++) {
+                const cellText = cells[i].textContent.toLowerCase();
+                if (cellText.includes(searchTerm)) {
+                    matchesSearch = true;
+                    break;
+                }
+            }
+        }
+        
+        // Get payment status (cell index 11)
+        let paymentStatus = '';
+        if (cells.length > 11) {
+            const paymentElement = cells[11].querySelector('.status');
+            paymentStatus = paymentElement ? paymentElement.textContent.trim().toLowerCase() : '';
+        }
+        
+        // Check payment status match
+        let matchesStatus = true;
+        if (statusFilter !== 'all') {
+            matchesStatus = paymentStatus === statusFilter.toLowerCase();
+        }
+        
+        // Get delivery status (cell index 13 - NEW POSITION)
+        let deliveryStatus = '';
+        if (cells.length > 13) {
+            const deliveryElement = cells[13].querySelector('.status');
+            deliveryStatus = deliveryElement ? deliveryElement.textContent.trim().toLowerCase() : '';
+        }
+        
+        // Check delivery status match
+        let matchesDelivery = true;
+        if (deliveryFilter !== 'all') {
+            matchesDelivery = deliveryStatus === deliveryFilter.toLowerCase();
+        }
+        
+        // Show/hide row based on filters
+        if (matchesSearch && matchesStatus && matchesDelivery) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}        
+
+        // Filter agents table based on search
+        function filterAgentsTable() {
+            const searchTerm = document.getElementById('agent-search').value.toLowerCase();
+            const rows = document.querySelectorAll('#agents-table-body tr');
+            
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length === 0) return;
+                
+                // Check ALL columns for search term
+                let matchesSearch = !searchTerm;
+                if (searchTerm) {
+                    matchesSearch = false;
+                    for (let i = 0; i < cells.length; i++) {
+                        const cellText = cells[i].textContent.toLowerCase();
+                        if (cellText.includes(searchTerm)) {
+                            matchesSearch = true;
+                            break;
+                        }
+                    }
+                }
+                
+                if (matchesSearch) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
