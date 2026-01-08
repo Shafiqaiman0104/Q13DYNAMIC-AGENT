@@ -490,6 +490,35 @@
             font-size: 1.3rem;
             font-weight: 600;
         }
+
+/* Date filter responsive */
+@media (max-width: 992px) {
+    .date-filter-container {
+        flex-wrap: wrap;
+        gap: 0.5rem !important;
+    }
+    
+    .date-filter-container > div {
+        flex: 1;
+        min-width: 140px;
+    }
+}
+
+@media (max-width: 768px) {
+    .date-filter-container {
+        flex-direction: column;
+        align-items: stretch !important;
+        gap: 0.5rem !important;
+    }
+    
+    .date-filter-container > div {
+        width: 100%;
+    }
+    
+    #clear-date-filter {
+        width: 100%;
+    }
+}
     </style>
 </head>
 <body>
@@ -591,6 +620,23 @@
                     <i class="fas fa-search"></i>
                     <input type="text" id="order-search" placeholder="Search order data...">
                 </div>
+
+ <!-- ADD THIS DATE FILTER SECTION -->
+    <div class="date-filter-container" style="display: flex; gap: 10px; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <label style="font-weight: 600; color: var(--dark-color);">From:</label>
+            <input type="date" id="date-from" class="filter-select" style="padding: 0.6rem;">
+        </div>
+        <div style="display: flex; align-items: center; gap: 5px;">
+            <label style="font-weight: 600; color: var(--dark-color);">To:</label>
+            <input type="date" id="date-to" class="filter-select" style="padding: 0.6rem;">
+        </div>
+        <button id="clear-date-filter" class="action-btn" style="padding: 0.6rem 1rem; background-color: #6c757d; color: white;">
+            <i class="fas fa-times"></i> Clear
+        </button>
+    </div>
+    <!-- END OF DATE FILTER SECTION -->
+
                 <div>
                     <select class="filter-select" id="order-status-filter">
                         <option value="all">All Statuses</option>
@@ -1560,6 +1606,23 @@
             if (agentSearch) {
                 agentSearch.addEventListener('input', filterAgentsTable);
             }
+
+// Date from filter
+document.getElementById('date-from').addEventListener('change', function() {
+    filterOrdersTable();
+});
+
+// Date to filter
+document.getElementById('date-to').addEventListener('change', function() {
+    filterOrdersTable();
+});
+
+// Clear date filter button
+document.getElementById('clear-date-filter').addEventListener('click', function() {
+    document.getElementById('date-from').value = '';
+    document.getElementById('date-to').value = '';
+    filterOrdersTable();
+});
         }
 
 // Filter orders table based on search and filters
@@ -1567,6 +1630,9 @@ function filterOrdersTable() {
     const searchTerm = document.getElementById('order-search').value.toLowerCase();
     const statusFilter = document.getElementById('order-status-filter').value;
     const deliveryFilter = document.getElementById('order-delivery-filter').value;
+    // ADD THESE TWO LINES
+    const dateFrom = document.getElementById('date-from').value;
+    const dateTo = document.getElementById('date-to').value;
     
     const rows = document.querySelectorAll('#orders-table-body tr');
     
@@ -1600,7 +1666,7 @@ function filterOrdersTable() {
             matchesStatus = paymentStatus === statusFilter.toLowerCase();
         }
         
-        // Get delivery status (cell index 13 - NEW POSITION)
+        // Get delivery status (cell index 13)
         let deliveryStatus = '';
         if (cells.length > 13) {
             const deliveryElement = cells[13].querySelector('.status');
@@ -1613,14 +1679,62 @@ function filterOrdersTable() {
             matchesDelivery = deliveryStatus === deliveryFilter.toLowerCase();
         }
         
-        // Show/hide row based on filters
-        if (matchesSearch && matchesStatus && matchesDelivery) {
+        // ADD DATE FILTERING CODE
+        // Get timestamp from first cell
+        const timestampText = cells[0].textContent;
+        
+        // Parse date from timestamp
+        let orderDate = null;
+        try {
+            // Try to parse the date from the formatted timestamp
+            const dateMatch = timestampText.match(/\w{3} \d{1,2}, \d{4}/);
+            if (dateMatch) {
+                orderDate = new Date(dateMatch[0]);
+            } else {
+                // Try parsing as ISO string
+                orderDate = new Date(timestampText);
+            }
+        } catch (e) {
+            orderDate = null;
+        }
+        
+        // Check date range match
+        let matchesDateRange = true;
+        if (dateFrom || dateTo) {
+            if (!orderDate) {
+                matchesDateRange = false;
+            } else {
+                const fromDate = dateFrom ? new Date(dateFrom) : null;
+                const toDate = dateTo ? new Date(dateTo) : null;
+                
+                if (fromDate) {
+                    fromDate.setHours(0, 0, 0, 0);
+                }
+                if (toDate) {
+                    toDate.setHours(23, 59, 59, 999);
+                }
+                
+                const orderDateTime = orderDate.getTime();
+                
+                if (fromDate && toDate) {
+                    matchesDateRange = orderDateTime >= fromDate.getTime() && 
+                                      orderDateTime <= toDate.getTime();
+                } else if (fromDate) {
+                    matchesDateRange = orderDateTime >= fromDate.getTime();
+                } else if (toDate) {
+                    matchesDateRange = orderDateTime <= toDate.getTime();
+                }
+            }
+        }
+        
+        // Show/hide row based on ALL filters (including date)
+        if (matchesSearch && matchesStatus && matchesDelivery && matchesDateRange) {
             row.style.display = '';
         } else {
             row.style.display = 'none';
         }
     });
-}        
+}    
 
         // Filter agents table based on search
         function filterAgentsTable() {
