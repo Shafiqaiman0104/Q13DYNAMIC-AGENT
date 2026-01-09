@@ -936,7 +936,7 @@
         // Initialize the dashboard
         document.addEventListener('DOMContentLoaded', async function() {
             try {
-                console.log('Loading data from Google Sheets for agent:', userId);
+               
                 
                 // Fetch all data in parallel
                 const [ordersResult, agentsResult, suppliersResult] = await Promise.allSettled([
@@ -948,16 +948,16 @@
                 // Handle orders data
                 if (ordersResult.status === 'fulfilled') {
                     ordersData = ordersResult.value;
-                    console.log('Orders data loaded:', ordersData.length, 'records');
+                   
                 } else {
-                    console.error('Failed to load orders:', ordersResult.reason);
+                   
                     showError(`Failed to load orders: ${ordersResult.reason.message || 'Unknown error'}`);
                 }
                 
                 // Handle agents data
                 if (agentsResult.status === 'fulfilled') {
                     agentsData = agentsResult.value;
-                    console.log('Agents data loaded:', agentsData.length, 'records');
+                   
                     
                     // Find current agent's data
                     myAgentData = agentsData.find(agent => 
@@ -967,22 +967,22 @@
                     );
                     
                     if (myAgentData) {
-                        console.log('Found agent data:', myAgentData);
+                       
                     } else {
-                        console.warn('Agent data not found for ID:', userId);
+                   
                         showError('Agent profile not found. Please contact administrator.');
                     }
                 } else {
-                    console.error('Failed to load agents:', agentsResult.reason);
+               
                     showError(`Failed to load agents: ${agentsResult.reason.message || 'Unknown error'}`);
                 }
                 
                 // Handle suppliers data
                 if (suppliersResult.status === 'fulfilled') {
                     suppliersData = suppliersResult.value;
-                    console.log('Suppliers data loaded:', suppliersData.length, 'records');
+               
                 } else {
-                    console.error('Failed to load suppliers:', suppliersResult.reason);
+              
                     showError(`Failed to load suppliers: ${suppliersResult.reason.message || 'Unknown error'}`);
                 }
                 
@@ -1004,8 +1004,8 @@
                 setupEventListeners();
                 
             } catch (error) {
-                console.error('Error loading data:', error);
-                showError(`Failed to load data: ${error.message}`);
+                console.error('Application error');
+                showError('Failed to load dashboard. Please refresh the page.');
             }
         });
 
@@ -1025,7 +1025,7 @@
         // Function to fetch orders data
         async function fetchOrdersData() {
             try {
-                console.log('Fetching orders data from:', ORDER_DATABASE_URL);
+        
                 const response = await fetch(ORDER_DATABASE_URL);
                 
                 if (!response.ok) {
@@ -1033,7 +1033,7 @@
                 }
                 
                 const result = await response.json();
-                console.log('Orders API response:', result);
+         
                 
                 if (result.success && Array.isArray(result.data)) {
                     // The first row is headers, so skip it
@@ -1049,10 +1049,10 @@
                         return obj;
                     });
                 } else {
-                    throw new Error(result.message || 'Invalid data format from orders API');
+                    throw new Error('Invalid data format');
                 }
             } catch (error) {
-                console.error('Error fetching orders data:', error);
+                console.error('Data loading error occurred');
                 throw error;
             }
         }
@@ -1060,7 +1060,7 @@
         // Function to fetch agents data
         async function fetchAgentsData() {
             try {
-                console.log('Fetching agents data from:', AGENT_DATABASE_URL);
+
                 const response = await fetch(AGENT_DATABASE_URL);
                 
                 if (!response.ok) {
@@ -1068,7 +1068,7 @@
                 }
                 
                 const result = await response.json();
-                console.log('Agents API response:', result);
+               
                 
                 if (result.success && Array.isArray(result.data)) {
                     // The first row is headers, so skip it
@@ -1086,10 +1086,10 @@
                         return obj;
                     });
                 } else {
-                    throw new Error(result.message || 'Invalid data format from agents API');
+                    throw new Error('Invalid data format');
                 }
             } catch (error) {
-                console.error('Error fetching agents data:', error);
+                console.error('Data loading error');
                 throw error;
             }
         }
@@ -1097,7 +1097,7 @@
         // Function to fetch suppliers data
         async function fetchSuppliersData() {
             try {
-                console.log('Fetching suppliers data from:', SUPPLIER_DATABASE_URL);
+             
                 const response = await fetch(SUPPLIER_DATABASE_URL);
                 
                 if (!response.ok) {
@@ -1105,15 +1105,15 @@
                 }
                 
                 const result = await response.json();
-                console.log('Suppliers API response:', result);
+          
                 
                 if (result.success && Array.isArray(result.data)) {
                     return result.data;
                 } else {
-                    throw new Error(result.message || 'Invalid data format from suppliers API');
+                    throw new Error('Invalid data format');
                 }
             } catch (error) {
-                console.error('Error fetching suppliers data:', error);
+                console.error('Data loading error');
                 throw error;
             }
         }
