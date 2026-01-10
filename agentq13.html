@@ -590,6 +590,9 @@
             <div class="tab" data-tab="top-agent">
                 <i class="fas fa-trophy"></i> Top Agent
             </div>
+  <div class="tab" data-tab="commission-rate">
+        <i class="fas fa-percentage"></i> Commission Rate
+    </div>
             <div class="tab" data-tab="my-profile">
                 <i class="fas fa-user"></i> My Profile
             </div>
@@ -754,6 +757,37 @@
                     </thead>
                     <tbody id="agents-table-body">
                         <!-- Agents data will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Commission Rate Tab -->
+        <div id="commission-rate" class="tab-content">
+            <div class="filters">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="commission-search" placeholder="Search commission rates...">
+                </div>
+            </div>
+
+            <div class="data-table-container">
+                <div class="loading" id="commission-loading">
+                    <div class="spinner"></div>
+                    <p>Loading commission rates...</p>
+                </div>
+                <table class="data-table" id="commission-table" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th>Code</th>
+                            <th>Name</th>
+                            <th>Size (Inch)</th>
+                            <th>Basic</th>
+                            <th>Premium (+50%)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="commission-table-body">
+                        <!-- Commission rates data will be populated here -->
                     </tbody>
                 </table>
             </div>
@@ -927,6 +961,8 @@
                     displayCustomerOrders();
                 } else if (tabId === 'top-agent') {
                     displayTopAgents();
+                } else if (tabId === 'commission-rate') {
+                    displayCommissionRates();
                 } else if (tabId === 'my-profile') {
                     displayMyProfile();
                 }
@@ -1630,6 +1666,109 @@ function getOrdersByMonth(orders) {
             tableElement.style.display = 'table';
         }
 
+        // Display commission rates from supplier database
+        function displayCommissionRates() {
+            const tableBody = document.getElementById('commission-table-body');
+            const loadingElement = document.getElementById('commission-loading');
+            const tableElement = document.getElementById('commission-table');
+            
+            // Clear existing rows
+            tableBody.innerHTML = '';
+            
+            // Show loading, hide table
+            loadingElement.style.display = 'flex';
+            tableElement.style.display = 'none';
+            
+            // Check if we have supplier data
+            if (!suppliersData || suppliersData.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 2rem;">
+                            <i class="fas fa-exclamation-circle" style="font-size: 2rem; color: #6c757d; margin-bottom: 1rem;"></i>
+                            <p>No commission rate data available.</p>
+                        </td>
+                    </tr>
+                `;
+                
+                // Hide loading, show table
+                loadingElement.style.display = 'none';
+                tableElement.style.display = 'table';
+                return;
+            }
+            
+            // Filter only the columns we need and calculate commissions
+            const commissionData = suppliersData.map(supplier => {
+                const profitAgent = parseFloat(supplier['Profit (Agent)']) || 0;
+                return {
+                    code: supplier.Code || '',
+                    name: supplier.Name || '',
+                    size: supplier.Inch || '',
+                    basic: profitAgent / 2, // Basic = Profit (Agent) / 2
+                    premium: profitAgent    // Premium = Profit (Agent)
+                };
+            });
+            
+            // Populate table with commission data
+            commissionData.forEach(item => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${escapeHtml(item.code)}</td>
+                    <td>${escapeHtml(item.name)}</td>
+                    <td>${escapeHtml(item.size)}</td>
+                    <td>RM ${item.basic.toFixed(2)}</td>
+                    <td>RM ${item.premium.toFixed(2)}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+            
+            // Hide loading, show table
+            loadingElement.style.display = 'none';
+            tableElement.style.display = 'table';
+            
+            // Set up search for commission rates
+            setupCommissionSearch();
+        }
+
+        // Set up search for commission rates
+        function setupCommissionSearch() {
+            const commissionSearch = document.getElementById('commission-search');
+            if (commissionSearch) {
+                commissionSearch.addEventListener('input', filterCommissionTable);
+            }
+        }
+        
+        // Filter commission table based on search
+        function filterCommissionTable() {
+            const searchTerm = document.getElementById('commission-search').value.toLowerCase();
+            const rows = document.querySelectorAll('#commission-table-body tr');
+            
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length === 0) return;
+                
+                // Check ALL columns for search term
+                let matchesSearch = !searchTerm;
+                if (searchTerm) {
+                    matchesSearch = false;
+                    for (let i = 0; i < cells.length; i++) {
+                        const cellText = cells[i].textContent.toLowerCase();
+                        if (cellText.includes(searchTerm)) {
+                            matchesSearch = true;
+                            break;
+                        }
+                    }
+                }
+                
+                if (matchesSearch) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
         // Calculate agent statistics
         function calculateAgentStats() {
             const agentStats = {};
@@ -1785,6 +1924,12 @@ if (type.toLowerCase() === 'basic') {
             const agentSearch = document.getElementById('agent-search');
             if (agentSearch) {
                 agentSearch.addEventListener('input', filterAgentsTable);
+            }
+
+// Commission search - ADD THIS
+            const commissionSearch = document.getElementById('commission-search');
+            if (commissionSearch) {
+                commissionSearch.addEventListener('input', filterCommissionTable);
             }
 
 // Date from filter
