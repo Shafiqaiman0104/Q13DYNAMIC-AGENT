@@ -550,6 +550,22 @@
     box-shadow: var(--box-shadow);
     border-left: 5px solid #4361ee;
 }
+/* Contest video link styling */
+.contest-video-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    border-radius: 4px;
+    transition: var(--transition);
+}
+
+.contest-video-link:hover {
+    background-color: rgba(255, 106, 0, 0.1);
+    transform: translateY(-2px);
+}
     </style>
 </head>
 <body>
@@ -581,6 +597,9 @@
 
         <!-- Navigation Tabs -->
         <div class="tabs">
+            <div class="tab" data-tab="contest">
+                <i class="fas fa-trophy"></i> Contest
+            </div>
             <div class="tab active" data-tab="dashboard">
                 <i class="fas fa-tachometer-alt"></i> Dashboard
             </div>
@@ -595,6 +614,115 @@
     </div>
             <div class="tab" data-tab="my-profile">
                 <i class="fas fa-user"></i> My Profile
+            </div>
+        </div>
+
+        <!-- Contest Tab -->
+        <div id="contest" class="tab-content">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <h2 style="color: var(--primary-color); margin-bottom: 0.5rem;">Contest 2026 Q1 (Jan - March)</h2>
+                <h3 style="color: var(--secondary-color);">CNY & HARI RAYA</h3>
+            </div>
+            
+            <div class="data-table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Image</th>
+                            <th>Video</th>
+                            <th>Product Code</th>
+                            <th>Product Name</th>
+                            <th>Bonus</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><img src="https://klmfirework.com/cdn/shop/files/SV216.png?v=1764129152&width=493" alt="SV216" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;"></td>
+                            <td>
+                                <a href="https://klmfirework.com/cdn/shop/videos/c/vp/bd37b03aadcd484b8733e9382f69da1e/bd37b03aadcd484b8733e9382f69da1e.HD-1080p-7.2Mbps-63828889.mp4?v=0" target="_blank" style="color: var(--primary-color); text-decoration: none;">
+                                    <i class="fas fa-video"></i> Watch
+                                </a>
+                            </td>
+                            <td>SV216</td>
+                            <td>Ruling the World</td>
+                            <td>50</td>
+                        </tr>
+                        <tr>
+                            <td><img src="https://klmfirework.com/cdn/shop/files/SV120.png?v=1764055048&width=1100" alt="SV120" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;"></td>
+                            <td>
+                                <a href="https://klmfirework.com/cdn/shop/videos/c/vp/036cdc26b03d43e485ae2b05f1f60256/036cdc26b03d43e485ae2b05f1f60256.HD-1080p-7.2Mbps-63753947.mp4?v=0" target="_blank" style="color: var(--primary-color); text-decoration: none;">
+                                    <i class="fas fa-video"></i> Watch
+                                </a>
+                            </td>
+                            <td>SV120</td>
+                            <td>Long Teng (VIP)</td>
+                            <td>50</td>
+                        </tr>
+                        <tr>
+                            <td><img src="https://klmfirework.com/cdn/shop/files/SV102.png?v=1764052255&width=493" alt="SV102" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;"></td>
+                            <td>
+                                <a href="https://klmfirework.com/cdn/shop/videos/c/vp/3d4672874d1548fdb7e0ca80df461bf4/3d4672874d1548fdb7e0ca80df461bf4.HD-1080p-7.2Mbps-63659020.mp4?v=0" target="_blank" style="color: var(--primary-color); text-decoration: none;">
+                                    <i class="fas fa-video"></i> Watch
+                                </a>
+                            </td>
+                            <td>SV102</td>
+                            <td>Three Killer Moves (3.0 Hole) (VIP)</td>
+                            <td>50</td>
+                        </tr>
+                        <tr>
+                            <td><img src="https://klmfirework.com/cdn/shop/files/SV116.png?v=1764054465&width=493" alt="SV116" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;"></td>
+                            <td>
+                                <a href="https://klmfirework.com/cdn/shop/videos/c/vp/d598d20f4e6e45fa9f0d340427938552/d598d20f4e6e45fa9f0d340427938552.HD-1080p-7.2Mbps-65253971.mp4?v=0" target="_blank" style="color: var(--primary-color); text-decoration: none;">
+                                    <i class="fas fa-video"></i> Watch
+                                </a>
+                            </td>
+                            <td>SV116</td>
+                            <td>Ne Zha (VIP)</td>
+                            <td>50</td>
+                        </tr>
+                        <tr>
+                            <td><img src="https://klmfirework.com/cdn/shop/files/SV219.png?v=1764129727&width=493" alt="SV219" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;"></td>
+                            <td>
+                                <a href="https://klmfirework.com/cdn/shop/videos/c/vp/b625a6ed2c444dacbf7a6aafa0653376/b625a6ed2c444dacbf7a6aafa0653376.HD-1080p-7.2Mbps-63829389.mp4?v=0" target="_blank" style="color: var(--primary-color); text-decoration: none;">
+                                    <i class="fas fa-video"></i> Watch
+                                </a>
+                            </td>
+                            <td>SV219</td>
+                            <td>King Long Teng Sheng Shi</td>
+                            <td>70</td>
+                        </tr>
+                        <tr>
+                            <td><img src="https://klmfirework.com/cdn/shop/files/SV118.png?v=1764054711&width=493" alt="SV118" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;"></td>
+                            <td>
+                                <a href="https://klmfirework.com/cdn/shop/videos/c/vp/5b6392f127b94f3e987e841fb4487cca/5b6392f127b94f3e987e841fb4487cca.HD-1080p-7.2Mbps-64935513.mp4?v=0" target="_blank" style="color: var(--primary-color); text-decoration: none;">
+                                    <i class="fas fa-video"></i> Watch
+                                </a>
+                            </td>
+                            <td>SV118</td>
+                            <td>Meng Zhu King (VIP)</td>
+                            <td>80</td>
+                        </tr>
+                        <tr>
+                            <td><img src="https://klmfirework.com/cdn/shop/files/SV221.png?v=1764129930&width=493" alt="SV221" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px;"></td>
+                            <td>
+                                <a href="https://klmfirework.com/cdn/shop/videos/c/vp/61ada7f1ec034373b205cfa7b61320c9/61ada7f1ec034373b205cfa7b61320c9.HD-1080p-7.2Mbps-64351944.mp4?v=0" target="_blank" style="color: var(--primary-color); text-decoration: none;">
+                                    <i class="fas fa-video"></i> Watch
+                                </a>
+                            </td>
+                            <td>SV221</td>
+                            <td>Feng Yun</td>
+                            <td>100</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div style="margin-top: 2rem; padding: 1.5rem; background: #f8f9fa; border-radius: var(--border-radius);">
+                <h4 style="color: var(--primary-color); margin-bottom: 1rem;"><i class="fas fa-info-circle"></i> Contest Rules</h4>
+                <ul style="margin-left: 1.5rem; color: var(--gray-color);">
+                    <li>Contest period: January 1 - March 31, 2026</li>
+                    <li>Bonus cash awarded for each sale of contest products</li>
+                </ul>
             </div>
         </div>
 
