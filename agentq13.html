@@ -566,6 +566,32 @@
     background-color: rgba(255, 106, 0, 0.1);
     transform: translateY(-2px);
 }
+/* Add this to your CSS section */
+.status-message {
+    padding: 0.5rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+    border-left: 3px solid transparent;
+}
+
+.status-message.info {
+    background-color: rgba(13, 110, 253, 0.1);
+    border-left-color: #0d6efd;
+    color: #0a58ca;
+}
+
+.status-message.success {
+    background-color: rgba(25, 135, 84, 0.1);
+    border-left-color: #198754;
+    color: #157347;
+}
+
+.status-message.warning {
+    background-color: rgba(255, 193, 7, 0.1);
+    border-left-color: #ffc107;
+    color: #997404;
+}
     </style>
 </head>
 <body>
@@ -1021,6 +1047,8 @@
     <div class="profile-field" style="margin-bottom: 0.8rem;">
         <div style="font-weight: 600; color: var(--dark-color); margin-bottom: 0.2rem;">Downline Status</div>
         <div id="profile-downline-status" style="color: var(--gray-color);"></div>
+ <!-- ADD THIS MESSAGE DIV -->
+        <div id="downline-status-message" class="status-message" style="display: none; margin-top: 0.5rem; font-size: 0.85rem;"></div>
     </div>
                     </div>
 
@@ -2075,8 +2103,41 @@ if (type.toLowerCase() === 'basic') {
             document.getElementById('profile-agent-id').textContent = agentId;
             document.getElementById('profile-full-name').textContent = name;
             document.getElementById('profile-agent-type').textContent = type.toUpperCase();
-            document.getElementById('profile-downline-status').textContent = downlineStatus.toUpperCase();
-            document.getElementById('profile-phone').textContent = phone;
+            // Set Downline Status with conditional message
+const downlineStatusElement = document.getElementById('profile-downline-status');
+const downlineMessageElement = document.getElementById('downline-status-message');
+downlineStatusElement.textContent = downlineStatus.toUpperCase();
+
+// Show message based on downline status
+downlineMessageElement.style.display = 'none'; // Hide by default
+downlineMessageElement.className = 'status-message'; // Reset classes
+
+if (downlineStatus.toLowerCase() === 'unqualified') {
+    downlineMessageElement.style.display = 'block';
+    downlineMessageElement.classList.add('warning');
+    downlineMessageElement.innerHTML = `
+        <i class="fas fa-info-circle"></i> 
+        You need to have at least <strong>one successful order</strong> to be QUALIFIED as an upline agent.
+        Once qualified, you can recruit downline agents and earn override commissions from their sales.
+    `;
+} else if (downlineStatus.toLowerCase() === 'qualified') {
+    downlineMessageElement.style.display = 'block';
+    downlineMessageElement.classList.add('success');
+    downlineMessageElement.innerHTML = `
+        <i class="fas fa-check-circle"></i> 
+        Congratulations! You are QUALIFIED to be an upline agent.
+        You can now recruit downline agents and earn override commissions from their sales.
+    `;
+} else if (downlineStatus.toLowerCase() === 'pending') {
+    downlineMessageElement.style.display = 'block';
+    downlineMessageElement.classList.add('info');
+    downlineMessageElement.innerHTML = `
+        <i class="fas fa-clock"></i> 
+        Your downline status is under review. Please contact administrator for more information.
+    `;
+}
+
+document.getElementById('profile-phone').textContent = phone;
             document.getElementById('profile-email').textContent = email;
             document.getElementById('profile-address').textContent = address;
             document.getElementById('profile-bank-name').textContent = bankName;
