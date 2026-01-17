@@ -2445,14 +2445,22 @@ function displayMyAgents(dateFrom = null, dateTo = null) {
     const downlineStats = myDownlines.map(downline => {
         const downlineId = downline['Agent ID'] || downline['Agent ID '] || downline.agentId || '';
         
-        // Filter orders for this downline by date range
-        const downlineOrders = ordersData.filter(order => {
-            const orderUserId = order.UserId || order.userId || '';
-            
-            // Check if order belongs to this downline
-            if (orderUserId !== downlineId) {
-                return false;
-            }
+        // Filter orders for this downline
+const downlineOrders = ordersData.filter(order => {
+    const orderDownline = order.Downline || order.downline || '';
+    
+    // FIRST: Check if the Downline column contains the CURRENT AGENT'S ID (upline)
+    // This means the order is credited to the upline (izal1477shaf)
+    if (orderDownline !== userId) {
+        return false;
+    }
+    
+    // SECOND: Check if the order was made by this downline agent
+    // This means the order belongs to the downline (try6789tryt)
+    const orderUserId = order.UserId || order.userId || '';
+    if (orderUserId !== downlineId) {
+        return false;
+    }
             
             // Check date range if filters are applied
             if (fromDate || toDate) {
@@ -2475,11 +2483,12 @@ function displayMyAgents(dateFrom = null, dateTo = null) {
             return true;
         });
         
+        // Now we have filtered orders that belong to this downline agent
         const totalOrders = downlineOrders.length;
         
         // Calculate override commission based on current agent's type
         let overrideCommission = 0;
-        if (myAgentData) {
+        if (myAgentData && totalOrders > 0) {
             const myAgentType = myAgentData.Type || myAgentData.type || 'basic';
             
             if (myAgentType.toLowerCase() === 'basic') {
@@ -2555,4 +2564,3 @@ function filterMyAgentsByDate() {
     </script>
 </body>
 </html>
-
