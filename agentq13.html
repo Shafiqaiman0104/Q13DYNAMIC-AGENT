@@ -592,6 +592,22 @@
     border-left-color: #ffc107;
     color: #997404;
 }
+/* Add this to your CSS */
+.downline-reminder-message {
+    background-color: rgba(255, 193, 7, 0.15);
+    color: #997404;
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 1.5rem;
+    border-left: 5px solid #ffc107;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.downline-reminder-message i {
+    font-size: 1.2rem;
+}
     </style>
 </head>
 <body>
@@ -943,6 +959,16 @@
         </div>
         <!-- END OF DATE FILTER SECTION -->
     </div>
+
+ <!-- ADD THIS REMINDER MESSAGE DIV HERE -->
+    <div id="downline-reminder-message" class="downline-reminder-message" style="display: none;">
+        <i class="fas fa-exclamation-triangle"></i>
+        <div>
+            <strong>Reminder:</strong> Your downline status is <span id="downline-status-text"></span>. 
+            You cannot earn override commission yet. You need to have at least 1 successful order to be QUALIFIED as an upline agent.
+        </div>
+    </div>
+    <!-- END OF REMINDER MESSAGE -->
 
     <div class="data-table-container">
         <div class="loading" id="my-agent-loading">
@@ -2379,6 +2405,26 @@ function displayMyAgents(dateFrom = null, dateTo = null) {
     const tableBody = document.getElementById('my-agent-table-body');
     const loadingElement = document.getElementById('my-agent-loading');
     const tableElement = document.getElementById('my-agent-table');
+
+ // ADD THIS: Show/hide downline status reminder
+    const reminderElement = document.getElementById('downline-reminder-message');
+    const downlineStatusText = document.getElementById('downline-status-text');
+
+ if (myAgentData) {
+        const downlineStatus = myAgentData['Downline Status'] || myAgentData.downlineStatus || 'unqualified';
+        
+        if (downlineStatus.toLowerCase() === 'unqualified') {
+            reminderElement.style.display = 'flex';
+            downlineStatusText.textContent = 'UNQUALIFIED';
+        } else if (downlineStatus.toLowerCase() === 'pending') {
+            reminderElement.style.display = 'flex';
+            downlineStatusText.textContent = 'PENDING';
+        } else {
+            reminderElement.style.display = 'none';
+        }
+    } else {
+        reminderElement.style.display = 'none';
+    }
     
     // Clear existing rows
     tableBody.innerHTML = '';
@@ -2487,16 +2533,21 @@ const downlineOrders = ordersData.filter(order => {
         const totalOrders = downlineOrders.length;
         
         // Calculate override commission based on current agent's type
-        let overrideCommission = 0;
-        if (myAgentData && totalOrders > 0) {
-            const myAgentType = myAgentData.Type || myAgentData.type || 'basic';
-            
-            if (myAgentType.toLowerCase() === 'basic') {
-                overrideCommission = totalOrders * 5; // RM5 per order for basic
-            } else if (myAgentType.toLowerCase() === 'premium') {
-                overrideCommission = totalOrders * 10; // RM10 per order for premium
-            }
+let overrideCommission = 0;
+if (myAgentData && totalOrders > 0) {
+    const myAgentType = myAgentData.Type || myAgentData.type || 'basic';
+    const downlineStatus = myAgentData['Downline Status'] || myAgentData.downlineStatus || 'unqualified';
+    
+    // Only calculate commission if agent is qualified
+    if (downlineStatus.toLowerCase() === 'qualified') {
+        if (myAgentType.toLowerCase() === 'basic') {
+            overrideCommission = totalOrders * 5; // RM5 per order for basic
+        } else if (myAgentType.toLowerCase() === 'premium') {
+            overrideCommission = totalOrders * 10; // RM10 per order for premium
         }
+    }
+    // If downlineStatus is 'unqualified' or 'pending', overrideCommission remains 0
+}
         
         return {
             agentId: downlineId,
